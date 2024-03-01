@@ -1,0 +1,64 @@
+# This YAML file defines a Kubernetes Deployment for MySQL using the apps/v1 API version.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+  labels: # este label es opcional, pero nos ayuda a identificar los pods que pertenecen a este deployment
+    app: mysql
+spec:
+  replicas: 1 # cuantos pods queremos que se creen
+  selector:
+    matchLabels: # este selector es obligatorio, es el que define que pods pertenecen a este deployment
+      app: mysql
+  template: # configuracion del pod
+    metadata:
+      labels:
+        app: mysql
+    spec: # aqui esta la chicha
+      containers:
+      - name: mysql #core
+        image: mysql:5.7 #core
+        ports: #core
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_USERNAME
+          valueFrom: # este valor viene de un secret
+            secretKeyRef:
+              name: my-secret # nombre del secret
+              key: MYSQL_USER
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: my-secret
+              key: MYSQL_PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: my-config-map
+              key: MYSQL_DATABASE
+        volumeMounts:
+          - name: mysql-initdb
+            mountPath: /docker-entrypoint-initdb.d
+          # - mountPath: "/var/lib/mysql"
+          #   subPath: "mysql"
+          #   name: mysql-data
+      volumes:
+        - name: mysql-initdb
+          configMap:
+            name: my-config-map
+        # - name: mysql-data
+        #   persistentVolumeClaim:
+        #     claimName: mysql-data-disk
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  type: LoadBalancer
+  selector: # debe ser igual que el selector del deployment, para que se puedan comunicar
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306 # puerto del servicio, puede ser cualquiera -> igual a targetPort para que reciba datos del flask server
+      targetPort: 3306 # puerto del contenedor

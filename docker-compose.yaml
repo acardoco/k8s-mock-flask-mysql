@@ -1,0 +1,29 @@
+version: '3.8'
+#kompose convert -f docker-compose.yaml
+services:
+  mysql-service:
+    image: mysql:5.7
+    container_name: mysql_database_python
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount SQL initialization script
+    command: --init-file=/docker-entrypoint-initdb.d/init.sql  # Execute the initialization script
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: word@press
+      MYSQL_DATABASE: wordbookdb
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: abc@123
+
+  python_server:
+    container_name: dummy_server_python
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mysql-service
+
+volumes:
+  db_data:
