@@ -5,4 +5,7 @@ It has the following things:
 2. MySQL database
 3. yaml for the deployments in kubernetes
 4. Dockerfile for the Flask image
-6. Docker Compose .yaml for testing before the k8s part
+5. Docker Compose .yaml for testing before the k8s part
+
+TO DO:
+- ingress conf. 

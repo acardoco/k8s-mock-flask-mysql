@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flask-server
+  name: flask-server-deployment
 spec:
   replicas: 1
   selector:
@@ -12,37 +12,44 @@ spec:
       labels:
         app: flask-server
     spec:
-      containers:
-      - name: flask-server
-        image: ancaco12/mock-server-flask:v6
-        ports:
-        - containerPort: 5000 # puerto del contenedor
-        env:
-        - name: USERNAME
-          valueFrom: # este valor viene de un secret
-            secretKeyRef:
-              name: my-secret # nombre del secret
-              key: MYSQL_USER
-        - name: USER_PASSWORD 
-          valueFrom: # este valor viene de un secret
-            secretKeyRef:
-              name: my-secret # nombre del secret
-              key: MYSQL_PASSWORD
-        - name: MYSQL_DATABASE_URL
-          valueFrom:
-            configMapKeyRef:
-              name: my-config-map
-              key: MYSQL_DATABASE
-        - name: MYSQL_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: my-config-map
-              key: MYSQL_HOST
+            containers:
+            - name: flask-server
+              image: ancaco12/mock-server-flask:v6
+              ports:
+              - containerPort: 5000 # puerto del contenedor
+              env:
+              - name: USERNAME
+                valueFrom: # este valor viene de un secret
+                  secretKeyRef:
+                    name: my-secret # nombre del secret
+                    key: MYSQL_USER
+              - name: USER_PASSWORD 
+                valueFrom: # este valor viene de un secret
+                  secretKeyRef:
+                    name: my-secret # nombre del secret
+                    key: MYSQL_PASSWORD
+              - name: MYSQL_DATABASE_URL
+                valueFrom:
+                  configMapKeyRef:
+                    name: my-config-map
+                    key: MYSQL_DATABASE
+              - name: MYSQL_HOST
+                valueFrom:
+                  configMapKeyRef:
+                    name: my-config-map
+                    key: MYSQL_HOST
+              resources:
+                limits:
+                  cpu: "0.5"
+                  memory: "512Mi"
+                requests:
+                  cpu: "0.1"
+                  memory: "256Mi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: flask-server
+  name: flask-server-service
 spec:
   type: ClusterIP
   selector:

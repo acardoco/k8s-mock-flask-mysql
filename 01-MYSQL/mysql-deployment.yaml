@@ -37,18 +37,18 @@ spec:
               name: my-config-map
               key: MYSQL_DATABASE
         volumeMounts:
+          - name: mysql-data
+            mountPath: /var/lib/mysql
+            subPath: "mysql"
           - name: mysql-initdb
             mountPath: /docker-entrypoint-initdb.d
-          # - mountPath: "/var/lib/mysql"
-          #   subPath: "mysql"
-          #   name: mysql-data
       volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: pvc
         - name: mysql-initdb
           configMap:
             name: my-config-map
-        # - name: mysql-data
-        #   persistentVolumeClaim:
-        #     claimName: mysql-data-disk
 ---
 apiVersion: v1
 kind: Service
